@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/editTextDiary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="写下你的日记..."
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/btnSaveDiary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="保存日记"
+        android:layout_below="@id/editTextDiary"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"/>
+
+    <ListView
+        android:id="@+id/listViewDiaries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnSaveDiary"
+        android:layout_marginTop="10dp"/>
+</RelativeLayout>

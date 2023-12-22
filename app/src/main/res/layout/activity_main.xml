@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnDiary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="日记"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnPlan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="计划"
+        android:layout_below="@id/btnDiary"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnBottle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="瓶子"
+        android:layout_below="@id/btnPlan"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnReward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="奖励"
+        android:layout_below="@id/btnBottle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnCryingGirl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="哭泣的女孩"
+        android:layout_below="@id/btnReward"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+</RelativeLayout>
