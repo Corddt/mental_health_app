@@ -1,21 +1,27 @@
 package com.corddt.mental_health_app;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class PlanActivity extends AppCompatActivity {
+public class PlanActivity extends AppCompatActivity implements PlanAdapter.OnPlanListener {
 
     private EditText editTextPlan;
-    private Button btnSavePlan;
-    private ListView listViewPlans;
-    private ArrayAdapter<String> planAdapter;
+    private RecyclerView recyclerViewPlans;
+    private PlanAdapter planAdapter;
     private DatabaseHelper databaseHelper;
+    private List<Plan> plans;
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,29 +29,83 @@ public class PlanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_plan);
 
         databaseHelper = new DatabaseHelper(this);
-
         editTextPlan = findViewById(R.id.editTextPlan);
-        btnSavePlan = findViewById(R.id.btnSavePlan);
-        listViewPlans = findViewById(R.id.listViewPlans);
-
+        recyclerViewPlans = findViewById(R.id.recyclerViewPlans);
+        recyclerViewPlans.setLayoutManager(new LinearLayoutManager(this));
         loadPlans();
 
-        btnSavePlan.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btnSavePlan).setOnClickListener(v -> addPlan());
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToToggleStatusCallback());
+        itemTouchHelper.attachToRecyclerView(recyclerViewPlans);
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public void onClick(View v) {
-                String plan = editTextPlan.getText().toString();
-                if (!plan.isEmpty()) {
-                    databaseHelper.addPlan(plan);
-                    editTextPlan.setText("");
-                    loadPlans();
+            public boolean onDoubleTap(MotionEvent e) {
+                View view = recyclerViewPlans.findChildViewUnder(e.getX(), e.getY());
+                if (view != null) {
+                    int position = recyclerViewPlans.getChildAdapterPosition(view);
+                    editPlanDialog(plans.get(position));
+                    return true;
                 }
+                return false;
             }
         });
+
+        recyclerViewPlans.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
     private void loadPlans() {
-        List<String> plans = databaseHelper.getAllPlans();
-        planAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, plans);
-        listViewPlans.setAdapter(planAdapter);
+        plans = databaseHelper.getAllPlans();
+        planAdapter = new PlanAdapter(plans, this, this);
+        recyclerViewPlans.setAdapter(planAdapter);
+    }
+
+    private void addPlan() {
+        String planContent = editTextPlan.getText().toString();
+        if (!planContent.isEmpty()) {
+            databaseHelper.addPlan(new Plan(0, planContent, false));
+            editTextPlan.setText("");
+            loadPlans();
+        }
+    }
+
+    @Override
+    public void onPlanClick(int position) {
+        // 不再需要单击事件
+    }
+
+    private void editPlanDialog(Plan plan) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Plan");
+        final EditText input = new EditText(this);
+        input.setText(plan.getContent());
+        builder.setView(input);
+        builder.setPositiveButton("Update", (dialog, which) -> {
+            String updatedPlan = input.getText().toString();
+            databaseHelper.updatePlan(plan.getId(), updatedPlan);
+            loadPlans();
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private class SwipeToToggleStatusCallback extends ItemTouchHelper.SimpleCallback {
+        SwipeToToggleStatusCallback() {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        }
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+            Plan plan = plans.get(position);
+            databaseHelper.togglePlanStatus(plan.getId());
+            loadPlans();
+        }
     }
 }

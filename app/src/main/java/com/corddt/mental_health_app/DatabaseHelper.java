@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-
     private static final String DATABASE_NAME = "MotivationalDiary.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String TABLE_NAME_DIARY = "diary_entries";
     private static final String TABLE_NAME_PLANS = "plans";
     private static final String COLUMN_ID = "id";
@@ -20,9 +19,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_PLAN = "plan";
     private static final String COLUMN_TIMESTAMP = "timestamp";
     private static final String COLUMN_COMPLETED = "completed";
-    private static final String TABLE_NAME_REWARDS = "rewards"; // 奖励表的名称
-    private static final String COLUMN_REWARD = "reward";       // 奖励表的列名
-
+    private static final String TABLE_NAME_REWARDS = "rewards";
+    private static final String COLUMN_REWARD = "reward";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -41,9 +39,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 创建计划表
         String createTablePlans = "CREATE TABLE " + TABLE_NAME_PLANS + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_PLAN + " TEXT)";
+                COLUMN_PLAN + " TEXT, " +
+                COLUMN_COMPLETED + " INTEGER DEFAULT 0)";
         db.execSQL(createTablePlans);
-
         // 创建奖励表
         String createTableRewards = "CREATE TABLE " + TABLE_NAME_REWARDS + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -54,11 +52,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // 删除旧表并创建新表
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_DIARY);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_PLANS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_REWARDS);
         onCreate(db);
     }
+
 
     public void addDiaryEntry(String entry) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -83,28 +82,63 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return diaries;
     }
 
-    public void addPlan(String plan) {
+    public void addPlan(Plan plan) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PLAN, plan);
+        values.put(COLUMN_PLAN, plan.getContent());
+        values.put(COLUMN_COMPLETED, plan.isCompleted() ? 1 : 0);
         db.insert(TABLE_NAME_PLANS, null, values);
         db.close();
     }
 
-    public List<String> getAllPlans() {
-        List<String> plans = new ArrayList<>();
+
+    public List<Plan> getAllPlans() {
+        List<Plan> plans = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME_PLANS, null);
-        int columnIndex = cursor.getColumnIndex(COLUMN_PLAN);
-        if (columnIndex != -1) { // 确保 columnIndex 是有效的
-            while (cursor.moveToNext()) {
-                plans.add(cursor.getString(columnIndex));
+
+        int idIndex = cursor.getColumnIndex(COLUMN_ID);
+        int planIndex = cursor.getColumnIndex(COLUMN_PLAN);
+        int completedIndex = cursor.getColumnIndex(COLUMN_COMPLETED);
+
+        while (cursor.moveToNext()) {
+            if (idIndex != -1 && planIndex != -1 && completedIndex != -1) {
+                int id = cursor.getInt(idIndex);
+                String content = cursor.getString(planIndex);
+                boolean completed = cursor.getInt(completedIndex) == 1;
+                plans.add(new Plan(id, content, completed));
             }
         }
         cursor.close();
         db.close();
         return plans;
     }
+
+    public void updatePlan(int planId, String newPlan) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PLAN, newPlan);
+        db.update(TABLE_NAME_PLANS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(planId)});
+        db.close();
+    }
+
+    public void togglePlanStatus(int planId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_NAME_PLANS, new String[]{COLUMN_COMPLETED}, COLUMN_ID + " = ?", new String[]{String.valueOf(planId)}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int completedIndex = cursor.getColumnIndex(COLUMN_COMPLETED);
+            if (completedIndex != -1) {
+                int currentStatus = cursor.getInt(completedIndex);
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_COMPLETED, currentStatus == 0 ? 1 : 0);
+                db.update(TABLE_NAME_PLANS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(planId)});
+            }
+            cursor.close();
+        }
+        db.close();
+    }
+
 
     public int getCompletedTasksCount() {
         SQLiteDatabase db = this.getReadableDatabase();

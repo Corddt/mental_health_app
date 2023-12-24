@@ -8,7 +8,7 @@
         android:id="@+id/btnDiary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="日记"
+        android:text="Diary"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
 
@@ -16,7 +16,7 @@
         android:id="@+id/btnPlan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="计划"
+        android:text="Plan"
         android:layout_below="@id/btnDiary"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
@@ -25,7 +25,7 @@
         android:id="@+id/btnBottle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="瓶子"
+        android:text="Bottle"
         android:layout_below="@id/btnPlan"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
@@ -34,7 +34,7 @@
         android:id="@+id/btnReward"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="奖励"
+        android:text="Reward"
         android:layout_below="@id/btnBottle"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
@@ -43,8 +43,9 @@
         android:id="@+id/btnCryingGirl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="哭泣的女孩"
+        android:text="Girl"
         android:layout_below="@id/btnReward"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
+
 </RelativeLayout>

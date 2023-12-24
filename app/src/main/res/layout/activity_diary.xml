@@ -8,14 +8,14 @@
         android:id="@+id/editTextDiary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="写下你的日记..."
+        android:hint="Write down your diary..."
         android:inputType="textMultiLine" />
 
     <Button
         android:id="@+id/btnSaveDiary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="保存日记"
+        android:text="Save the diary."
         android:layout_below="@id/editTextDiary"
         android:layout_alignParentRight="true"
         android:layout_marginTop="10dp"/>
