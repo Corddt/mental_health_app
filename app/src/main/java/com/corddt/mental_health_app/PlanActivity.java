@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class PlanActivity extends AppCompatActivity implements PlanAdapter.OnPlanListener {
+public class PlanActivity extends AppCompatActivity {
 
     private EditText editTextPlan;
     private RecyclerView recyclerViewPlans;
@@ -57,7 +57,7 @@ public class PlanActivity extends AppCompatActivity implements PlanAdapter.OnPla
 
     private void loadPlans() {
         plans = databaseHelper.getAllPlans();
-        planAdapter = new PlanAdapter(plans, this, this);
+        planAdapter = new PlanAdapter(plans, this);
         recyclerViewPlans.setAdapter(planAdapter);
     }
 
@@ -68,11 +68,6 @@ public class PlanActivity extends AppCompatActivity implements PlanAdapter.OnPla
             editTextPlan.setText("");
             loadPlans();
         }
-    }
-
-    @Override
-    public void onPlanClick(int position) {
-        // 不再需要单击事件
     }
 
     private void editPlanDialog(Plan plan) {

@@ -139,10 +139,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-
-    public int getCompletedTasksCount() {
+    public int getCompletedPlansCount() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME_DIARY + " WHERE " + COLUMN_COMPLETED + " = 1", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME_PLANS + " WHERE " + COLUMN_COMPLETED + " = 1", null);
         int count = 0;
         if (cursor.moveToFirst()) {
             count = cursor.getInt(0);

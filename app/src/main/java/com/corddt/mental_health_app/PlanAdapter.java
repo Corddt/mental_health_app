@@ -11,18 +11,16 @@ import java.util.List;
 public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder> {
     private List<Plan> planList;
     private Context context;
-    private OnPlanListener onPlanListener;
 
-    public PlanAdapter(List<Plan> planList, Context context, OnPlanListener onPlanListener) {
+    public PlanAdapter(List<Plan> planList, Context context) {
         this.planList = planList;
         this.context = context;
-        this.onPlanListener = onPlanListener;
     }
 
     @Override
     public PlanViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
-        return new PlanViewHolder(view, onPlanListener);
+        return new PlanViewHolder(view);
     }
 
     @Override
@@ -38,24 +36,12 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder
         return planList.size();
     }
 
-    public static class PlanViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class PlanViewHolder extends RecyclerView.ViewHolder {
         public TextView planTextView;
-        OnPlanListener onPlanListener;
 
-        public PlanViewHolder(View itemView, OnPlanListener onPlanListener) {
+        public PlanViewHolder(View itemView) {
             super(itemView);
             planTextView = itemView.findViewById(android.R.id.text1);
-            this.onPlanListener = onPlanListener;
-            itemView.setOnClickListener(this);
         }
-
-        @Override
-        public void onClick(View view) {
-            onPlanListener.onPlanClick(getAdapterPosition());
-        }
-    }
-
-    public interface OnPlanListener {
-        void onPlanClick(int position);
     }
 }

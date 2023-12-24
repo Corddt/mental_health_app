@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.corddt.mental_health_app"
-        minSdk = 34
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

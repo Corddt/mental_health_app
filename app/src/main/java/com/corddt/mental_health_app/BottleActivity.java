@@ -21,22 +21,23 @@ public class BottleActivity extends AppCompatActivity {
     }
 
     private void updateBottleAnimation() {
-        int completedTasksCount = databaseHelper.getCompletedTasksCount();
-        int imageResource = getResourceIdForBottle(completedTasksCount);
+        int completedPlansCount = databaseHelper.getCompletedPlansCount();
+        int imageResource = getResourceIdForBottle(completedPlansCount);
         bottleImageView.setImageResource(imageResource);
     }
 
-    private int getResourceIdForBottle(int completedTasksCount) {
-        switch (completedTasksCount) {
+    private int getResourceIdForBottle(int completedPlansCount) {
+        // 根据完成的计划数量选择相应的瓶子图像资源
+        switch (completedPlansCount) {
             case 1:
                 return R.drawable.bottle1;
             case 2:
                 return R.drawable.bottle2;
             case 3:
                 return R.drawable.bottle3;
-            // 添加更多情况，根据完成的任务数量
+            // 可以继续添加更多的情况
             default:
-                return R.drawable.bottle0;
+                return R.drawable.bottle0; // 默认为空瓶子
         }
     }
 }
