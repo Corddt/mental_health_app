@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "MotivationalDiary.db";
@@ -33,14 +35,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_ENTRY + " TEXT, " +
                 COLUMN_COMPLETED + " INTEGER DEFAULT 0, " +
-                COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
+                COLUMN_TIMESTAMP + " TEXT DEFAULT (strftime('%Y-%m-%d', 'now')))";
         db.execSQL(createTableDiary);
 
         // 创建计划表
         String createTablePlans = "CREATE TABLE " + TABLE_NAME_PLANS + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PLAN + " TEXT, " +
-                COLUMN_COMPLETED + " INTEGER DEFAULT 0)";
+                COLUMN_COMPLETED + " INTEGER DEFAULT 0, " +
+                COLUMN_TIMESTAMP + " TEXT DEFAULT (strftime('%Y-%m-%d', 'now')))";
         db.execSQL(createTablePlans);
         // 创建奖励表
         String createTableRewards = "CREATE TABLE " + TABLE_NAME_REWARDS + " (" +
@@ -192,4 +195,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return isInactive;
     }
+    // 获取指定日期的日记和计划
+    public List<String> getDiaryAndPlansByDate(String date) {
+        List<String> diaryAndPlans = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        // 获取日记
+        Cursor diaryCursor = db.rawQuery("SELECT * FROM " + TABLE_NAME_DIARY + " WHERE " + COLUMN_TIMESTAMP + " = ?", new String[]{date});
+        int entryIndexDiary = diaryCursor.getColumnIndex(COLUMN_ENTRY);
+        while (diaryCursor.moveToNext()) {
+            if (entryIndexDiary != -1) {
+                String entry = diaryCursor.getString(entryIndexDiary);
+                diaryAndPlans.add("Diary: " + entry);
+            }
+        }
+        diaryCursor.close();
+
+        // 获取计划
+        Cursor planCursor = db.rawQuery("SELECT * FROM " + TABLE_NAME_PLANS + " WHERE " + COLUMN_TIMESTAMP + " = ?", new String[]{date});
+        int contentIndexPlan = planCursor.getColumnIndex(COLUMN_PLAN);
+        int completedIndexPlan = planCursor.getColumnIndex(COLUMN_COMPLETED);
+        while (planCursor.moveToNext()) {
+            if (contentIndexPlan != -1 && completedIndexPlan != -1) {
+                String content = planCursor.getString(contentIndexPlan);
+                boolean completed = planCursor.getInt(completedIndexPlan) == 1;
+                diaryAndPlans.add("Plan: " + content + " (Completed: " + (completed ? "Yes" : "No") + ")");
+            }
+        }
+        planCursor.close();
+
+        db.close();
+        return diaryAndPlans;
+    }
+
 }

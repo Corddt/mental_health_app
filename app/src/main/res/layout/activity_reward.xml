@@ -4,8 +4,31 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <ListView
-        android:id="@+id/listViewRewards"
+    <CalendarView
+        android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:id="@+id/tvDiaryCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/calendarView"
+        android:text="Diaries: 0" />
+
+    <TextView
+        android:id="@+id/tvPlanCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvDiaryCount"
+        android:text="Plans: 0" />
+
+    <ListView
+        android:id="@+id/listViewDiaryAndPlans"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPlanCount" />
 </RelativeLayout>
+
+

@@ -4,6 +4,7 @@ public class Plan {
     private int id;
     private String content;
     private boolean isCompleted;
+    private String timestamp;
 
     public Plan(int id, String content, boolean isCompleted) {
         this.id = id;
