@@ -1,5 +1,7 @@
 package com.corddt.mental_health_app;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,7 +13,7 @@ public class CryingGirlActivity extends AppCompatActivity {
 
     private ImageView girlImageView;
     private Button motivateButton;
-    private DatabaseHelper databaseHelper;
+    private SQLiteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +22,7 @@ public class CryingGirlActivity extends AppCompatActivity {
 
         girlImageView = findViewById(R.id.cryingGirlImageView);
         motivateButton = findViewById(R.id.motivateButton);
-        databaseHelper = new DatabaseHelper(this);
-
+        openDatabase();
         updateGirlStatus();
 
         motivateButton.setOnClickListener(v -> {
@@ -29,8 +30,12 @@ public class CryingGirlActivity extends AppCompatActivity {
         });
     }
 
+    private void openDatabase() {
+        database = openOrCreateDatabase("MotivationalDiary1.db", MODE_PRIVATE, null);
+    }
+
     private void updateGirlStatus() {
-        boolean isInactive = databaseHelper.checkUserInactivity(3);
+        boolean isInactive = checkUserInactivity(3);
         if (isInactive) {
             girlImageView.setImageResource(R.drawable.crying_girl);
             showReminderDialog("You haven't completed any tasks in the last three days. Let's get back on track!");
@@ -40,10 +45,28 @@ public class CryingGirlActivity extends AppCompatActivity {
         }
     }
 
+    private boolean checkUserInactivity(int days) {
+        String dateLimit = "datetime('now', '-" + days + " days')";
+        String query = "SELECT COUNT(*) FROM diary_entries WHERE timestamp > " + dateLimit;
+        Cursor cursor = database.rawQuery(query, null);
+        boolean isInactive = true;
+        if (cursor.moveToFirst()) {
+            isInactive = cursor.getInt(0) == 0; // 如果计数为0，则表示用户不活跃
+        }
+        cursor.close();
+        return isInactive;
+    }
+
     private void showReminderDialog(String message) {
         new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        database.close();
+        super.onDestroy();
     }
 }

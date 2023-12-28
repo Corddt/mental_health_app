@@ -1,17 +1,20 @@
 package com.corddt.mental_health_app;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlanActivity extends AppCompatActivity {
@@ -19,7 +22,7 @@ public class PlanActivity extends AppCompatActivity {
     private EditText editTextPlan;
     private RecyclerView recyclerViewPlans;
     private PlanAdapter planAdapter;
-    private DatabaseHelper databaseHelper;
+    private SQLiteDatabase database;
     private List<Plan> plans;
     private GestureDetector gestureDetector;
 
@@ -28,10 +31,10 @@ public class PlanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plan);
 
-        databaseHelper = new DatabaseHelper(this);
         editTextPlan = findViewById(R.id.editTextPlan);
         recyclerViewPlans = findViewById(R.id.recyclerViewPlans);
         recyclerViewPlans.setLayoutManager(new LinearLayoutManager(this));
+        openDatabase();
         loadPlans();
 
         findViewById(R.id.btnSavePlan).setOnClickListener(v -> addPlan());
@@ -55,8 +58,31 @@ public class PlanActivity extends AppCompatActivity {
         recyclerViewPlans.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
+    private void openDatabase() {
+        database = openOrCreateDatabase("MotivationalDiary1.db", MODE_PRIVATE, null);
+        createTableIfNotExists();
+    }
+
+    private void createTableIfNotExists() {
+        String CREATE_PLANS_TABLE = "CREATE TABLE IF NOT EXISTS plans ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "plan TEXT,"
+                + "completed INTEGER DEFAULT 0,"
+                + "timestamp TEXT DEFAULT (strftime('%Y-%m-%d', 'now')))"; // 添加 timestamp 列
+        database.execSQL(CREATE_PLANS_TABLE);
+    }
+
+
     private void loadPlans() {
-        plans = databaseHelper.getAllPlans();
+        plans = new ArrayList<>();
+        Cursor cursor = database.rawQuery("SELECT * FROM plans", null);
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex("id"));
+            String content = cursor.getString(cursor.getColumnIndex("plan"));
+            int completed = cursor.getInt(cursor.getColumnIndex("completed"));
+            plans.add(new Plan(id, content, completed == 1));
+        }
+        cursor.close();
         planAdapter = new PlanAdapter(plans, this);
         recyclerViewPlans.setAdapter(planAdapter);
     }
@@ -64,7 +90,10 @@ public class PlanActivity extends AppCompatActivity {
     private void addPlan() {
         String planContent = editTextPlan.getText().toString();
         if (!planContent.isEmpty()) {
-            databaseHelper.addPlan(new Plan(0, planContent, false));
+            ContentValues values = new ContentValues();
+            values.put("plan", planContent);
+            values.put("completed", 0); // Assuming new plans are not completed
+            database.insert("plans", null, values);
             editTextPlan.setText("");
             loadPlans();
         }
@@ -78,7 +107,9 @@ public class PlanActivity extends AppCompatActivity {
         builder.setView(input);
         builder.setPositiveButton("Update", (dialog, which) -> {
             String updatedPlan = input.getText().toString();
-            databaseHelper.updatePlan(plan.getId(), updatedPlan);
+            ContentValues values = new ContentValues();
+            values.put("plan", updatedPlan);
+            database.update("plans", values, "id = ?", new String[]{String.valueOf(plan.getId())});
             loadPlans();
         });
         builder.setNegativeButton("Cancel", null);
@@ -99,8 +130,25 @@ public class PlanActivity extends AppCompatActivity {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
             Plan plan = plans.get(position);
-            databaseHelper.togglePlanStatus(plan.getId());
+            togglePlanStatus(plan.getId());
             loadPlans();
         }
+
+        private void togglePlanStatus(int planId) {
+            Cursor cursor = database.query("plans", new String[]{"completed"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int currentStatus = cursor.getInt(cursor.getColumnIndex("completed"));
+                ContentValues values = new ContentValues();
+                values.put("completed", currentStatus == 0 ? 1 : 0);
+                database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        database.close();
+        super.onDestroy();
     }
 }

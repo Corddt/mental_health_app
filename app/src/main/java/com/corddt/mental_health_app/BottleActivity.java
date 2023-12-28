@@ -1,5 +1,7 @@
 package com.corddt.mental_health_app;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class BottleActivity extends AppCompatActivity {
 
     private ImageView bottleImageView;
-    private DatabaseHelper databaseHelper;
+    private SQLiteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,19 +17,31 @@ public class BottleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bottle);
 
         bottleImageView = findViewById(R.id.bottleImageView);
-        databaseHelper = new DatabaseHelper(this);
-
+        openDatabase();
         updateBottleAnimation();
     }
 
+    private void openDatabase() {
+        database = openOrCreateDatabase("MotivationalDiary1.db", MODE_PRIVATE, null);
+    }
+
     private void updateBottleAnimation() {
-        int completedPlansCount = databaseHelper.getCompletedPlansCount();
+        int completedPlansCount = getCompletedPlansCount();
         int imageResource = getResourceIdForBottle(completedPlansCount);
         bottleImageView.setImageResource(imageResource);
     }
 
+    private int getCompletedPlansCount() {
+        int count = 0;
+        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM plans WHERE completed = 1", null);
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
     private int getResourceIdForBottle(int completedPlansCount) {
-        // 根据完成的计划数量选择相应的瓶子图像资源
         switch (completedPlansCount) {
             case 1:
                 return R.drawable.bottle1;
@@ -35,9 +49,14 @@ public class BottleActivity extends AppCompatActivity {
                 return R.drawable.bottle2;
             case 3:
                 return R.drawable.bottle3;
-            // 可以继续添加更多的情况
             default:
-                return R.drawable.bottle0; // 默认为空瓶子
+                return R.drawable.bottle0;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        database.close();
+        super.onDestroy();
     }
 }
