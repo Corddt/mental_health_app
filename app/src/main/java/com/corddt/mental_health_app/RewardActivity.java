@@ -45,7 +45,6 @@ public class RewardActivity extends AppCompatActivity {
         String date = year + "-" + (month + 1) + "-" + dayOfMonth;
         List<String> diaryAndPlans = getDiaryAndPlansByDate(date);
 
-        // 更新日记和计划的数量
         int diaryCount = 0, planCount = 0;
         for (String item : diaryAndPlans) {
             if (item.startsWith("Diary:")) diaryCount++;
@@ -54,9 +53,19 @@ public class RewardActivity extends AppCompatActivity {
         tvDiaryCount.setText("Diaries: " + diaryCount);
         tvPlanCount.setText("Plans: " + planCount);
 
+        // 检测是否存在日记或计划
+        if (diaryCount == 0 && planCount == 0) {
+            // 没有日记或计划的情况，使用心理学上的鼓励性表述
+            diaryAndPlans.add("No entries for today. Remember, jotting down your thoughts and plans can be a great way to reflect and grow.");
+        } else {
+            // 存在日记或计划的情况，鼓励用户继续坚持
+            diaryAndPlans.add("Great work! Keep up with your journaling and planning. It's a powerful tool for personal development.");
+        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, diaryAndPlans);
         listViewDiaryAndPlans.setAdapter(adapter);
     }
+
 
     private List<String> getDiaryAndPlansByDate(String date) {
         List<String> diaryAndPlans = new ArrayList<>();
