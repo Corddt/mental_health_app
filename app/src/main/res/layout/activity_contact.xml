@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_horizontal">
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Contact Information"
+      android:textSize="24sp"
+      android:layout_marginBottom="16dp"/>
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Name: 宸犀(Chen Xi)"
+      android:textSize="18sp"
+      android:padding="4dp"/>
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Instagram: chenxiii2023"
+      android:textSize="18sp"
+      android:padding="4dp"/>
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Mail: ddttted@gmail.com"
+      android:textSize="18sp"
+      android:padding="4dp"/>
+
+  <!-- 您可以根据需要在此添加更多联系信息 -->
+</LinearLayout>

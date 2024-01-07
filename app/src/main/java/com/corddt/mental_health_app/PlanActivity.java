@@ -1,21 +1,27 @@
 package com.corddt.mental_health_app;
 
 import android.content.ContentValues;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PlanActivity extends AppCompatActivity {
 
@@ -37,7 +43,8 @@ public class PlanActivity extends AppCompatActivity {
         openDatabase();
         loadPlans();
 
-        findViewById(R.id.btnSavePlan).setOnClickListener(v -> addPlan());
+        Button btnSavePlan = findViewById(R.id.btnSavePlan);
+        btnSavePlan.setOnClickListener(v -> addPlan());
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToToggleStatusCallback());
         itemTouchHelper.attachToRecyclerView(recyclerViewPlans);
@@ -56,6 +63,12 @@ public class PlanActivity extends AppCompatActivity {
         });
 
         recyclerViewPlans.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+        Button btnToBottle = findViewById(R.id.btnToBottle);
+        btnToBottle.setOnClickListener(v -> {
+            Intent intent = new Intent(PlanActivity.this, BottleActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void openDatabase() {
@@ -68,10 +81,9 @@ public class PlanActivity extends AppCompatActivity {
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "plan TEXT,"
                 + "completed INTEGER DEFAULT 0,"
-                + "timestamp TEXT DEFAULT (strftime('%Y-%m-%d', 'now')))"; // 添加 timestamp 列
+                + "timestamp TEXT DEFAULT (strftime('%Y-%m-%d', 'now')))";
         database.execSQL(CREATE_PLANS_TABLE);
     }
-
 
     private void loadPlans() {
         plans = new ArrayList<>();
@@ -92,7 +104,7 @@ public class PlanActivity extends AppCompatActivity {
         if (!planContent.isEmpty()) {
             ContentValues values = new ContentValues();
             values.put("plan", planContent);
-            values.put("completed", 0); // Assuming new plans are not completed
+            values.put("completed", 0);
             database.insert("plans", null, values);
             editTextPlan.setText("");
             loadPlans();
@@ -135,14 +147,49 @@ public class PlanActivity extends AppCompatActivity {
         }
 
         private void togglePlanStatus(int planId) {
-            Cursor cursor = database.query("plans", new String[]{"completed"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
+            Cursor cursor = database.query("plans", new String[]{"completed", "timestamp"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int currentStatus = cursor.getInt(cursor.getColumnIndex("completed"));
-                ContentValues values = new ContentValues();
-                values.put("completed", currentStatus == 0 ? 1 : 0);
-                database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
+                String timestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
+
+                if (currentStatus == 0 && canCompletePlan()) {
+                    ContentValues values = new ContentValues();
+                    values.put("completed", 1);
+                    values.put("timestamp", getCurrentTimestamp());
+                    database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
+                    Toast.makeText(PlanActivity.this, "You're amazing, you've taken another step towards mastering your own life.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(PlanActivity.this, "The gap between the two plans is too short (less than 25 minutes). Please wait a little longer.", Toast.LENGTH_LONG).show();
+                }
                 cursor.close();
             }
+        }
+
+        private boolean canCompletePlan() {
+            Cursor cursor = database.rawQuery("SELECT timestamp FROM plans WHERE completed = 1 ORDER BY timestamp DESC LIMIT 1", null);
+            if (cursor != null && cursor.moveToFirst()) {
+                String lastCompletedTimestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
+                cursor.close();
+                return isTimeDifferenceSufficient(lastCompletedTimestamp);
+            }
+            return true; // 如果没有先前的完成计划，允许完成当前计划
+        }
+
+        private boolean isTimeDifferenceSufficient(String lastCompletedTimestamp) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            try {
+                Date lastCompletedDate = sdf.parse(lastCompletedTimestamp);
+                long timeDifference = new Date().getTime() - lastCompletedDate.getTime();
+                return timeDifference >= (25 * 60 * 1000); // 25分钟
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        private String getCurrentTimestamp() {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            return sdf.format(new Date());
         }
     }
 

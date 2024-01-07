@@ -1,51 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    app:layoutDescription="@xml/activity_main_scene">
 
     <Button
         android:id="@+id/btnDiary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_weight="1"
+        android:background="@drawable/main_activity_btn_diary_pic"
         android:text="Diary"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="60sp"
+        android:textStyle="bold|italic" />
 
     <Button
         android:id="@+id/btnPlan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/main_activity_btn_plan_pic"
         android:text="Plan"
-        android:layout_below="@id/btnDiary"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
-
-    <Button
-        android:id="@+id/btnBottle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bottle"
-        android:layout_below="@id/btnPlan"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:textColor="#FFFFFF"
+        android:textSize="60sp"
+        android:textStyle="bold|italic" />
 
     <Button
         android:id="@+id/btnReward"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/main_activity_btn_reward_pic"
         android:text="Reward"
-        android:layout_below="@id/btnBottle"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
-
+        android:textColor="#FFFFFF"
+        android:textSize="60sp"
+        android:textStyle="bold|italic" />
     <Button
-        android:id="@+id/btnCryingGirl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Girl"
-        android:layout_below="@id/btnReward"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:id="@+id/btnContact"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/main_activity_btn_girl_pic"
+        android:text="Contact"
+        android:textColor="#FFFFFF"
+        android:textSize="60sp"
+        android:textStyle="bold|italic" />
 
-</RelativeLayout>
+
+
+</LinearLayout>

@@ -42,7 +42,7 @@ public class RewardActivity extends AppCompatActivity {
     }
 
     private void updateDiaryAndPlansList(int year, int month, int dayOfMonth) {
-        String date = year + "-" + (month + 1) + "-" + dayOfMonth;
+        String date = String.format("%d-%02d-%02d", year, month + 1, dayOfMonth);
         List<String> diaryAndPlans = getDiaryAndPlansByDate(date);
 
         int diaryCount = 0, planCount = 0;
