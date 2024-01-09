@@ -12,39 +12,77 @@
 
 ---
 
-## Main Interface (MainActivity)
+### Main Interface (MainActivity)
 - Contains four buttons, each leading to different functional modules.
 - Provides access to the diary, planning, reward, and contact information.
 
-## Planning Activity (PlanActivity)
+### Planning Activity (PlanActivity)
 - Allows users to add, edit, and view daily plans.
 - Supports marking the completion status of plans through swipe actions.
 - Displays encouraging animations upon plan completion.
 
-## Bottle Activity (BottleActivity)
+### Bottle Activity (BottleActivity)
 - Shows the total number of plans and completed plans for the current date.
 - Plays different animation effects based on the number of completed plans.
 
-## Diary Activity (DiaryActivity)
+### Diary Activity (DiaryActivity)
 - Users can record and view their diaries.
 - Supports adding and editing diary entries.
 - Displays a list of all diary entries.
 
-## Reward Activity (RewardActivity)
+### Reward Activity (RewardActivity)
 - Includes a calendar view that allows users to select specific dates.
 - Displays diary and plan records for the selected date.
 - Provides motivational feedback based on diary and plan completion.
 
-## Contact Interface (ContactActivity)
+### Contact Interface (ContactActivity)
 - Provides contact information and other important details.
 - Used for seeking help or providing feedback.
 
-## Crying Girl Interface (CryingGirlActivity)
+### Crying Girl Interface (CryingGirlActivity)
 - Displays an animated girl reflecting the user's activity status.
 - If the user hasn't completed any tasks for several days, a crying girl animation is shown.
 - An encouragement button encourages users to complete tasks and change the girl's state.
 
-## Startup Interface (SplashActivity)
+### Startup Interface (SplashActivity)
 - Shown when the app is launched.
 - Displays a different startup screen based on the current theme (day/night mode).
 - Includes a brief animation before transitioning to the main interface.
+
+
+## Technical Architecture
+1. **Frontend Interface (UI/UX)**
+    - Utilizes Android's standard UI components and layouts.
+    - Employs the Lottie animation library to enhance the user interaction experience.
+    - Uses `RecyclerView` for displaying dynamic lists, such as plan and diary entries.
+
+2. **Backend Logic**
+    - Java serves as the primary programming language.
+    - Activities (`Activity`) manage different user interfaces and interactions.
+    - Utilizes gesture detectors (`GestureDetector`) to handle complex user inputs, such as double-taps and swipe actions.
+
+3. **Data Storage**
+    - Utilizes an SQLite database for local data storage.
+    - Database operations include table creation, insertion, updating, querying, and deletion.
+
+4. **Data Models**
+    - Defines data classes (`Plan`, `DiaryEntry`) to represent the core data structures within the application.
+
+## Database Design
+1. **Plans Table**
+    - `id`: Primary key, auto-incremented.
+    - `plan`: Text, representing plan content.
+    - `completed`: Integer, indicating whether the plan is completed (0 for incomplete, 1 for completed).
+    - `timestamp`: Text, recording the date of the plan.
+
+2. **Diary Entries Table**
+    - `id`: Primary key, auto-incremented.
+    - `entry`: Text, representing diary content.
+    - `timestamp`: Text, recording the date of the diary entry.
+
+## Key Technical Points
+- Database operations are performed using Android's `SQLiteDatabase` class.
+- The `ContentValues` class is used to encapsulate data to be inserted or updated.
+- Query results are traversed and processed using the `Cursor` object.
+- Data persistence ensures that user data is retained even after the app is closed.
+- The adapter pattern (`Adapter`) is used to connect data models with `RecyclerView`.
