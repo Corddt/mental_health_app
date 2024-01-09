@@ -1,3 +1,4 @@
+English | [简体中文](README_zh.md)
 # Introduction to the Features of the Mental Health Assistant App
 
 ## Table of Contents
@@ -9,8 +10,6 @@
 6. [Contact Interface (ContactActivity)](#contact-interface-contactactivity)
 7. [Crying Girl Interface (CryingGirlActivity)](#crying-girl-interface-cryinggirlactivity)
 8. [Startup Interface (SplashActivity)](#startup-interface-splashactivity)
-
----
 
 ### Main Interface (MainActivity)
 - Contains four buttons, each leading to different functional modules.
