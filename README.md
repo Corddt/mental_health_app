@@ -1,6 +1,18 @@
 English | [简体中文](README_zh.md)
 # Introduction to the Features of the Mental Health Assistant App
 
+## Possible Improvements
+- For the background color of the diary this kind of light beige
+- And for users full journal experience
+- Put lines like a notebook and I highly suggest that the font in the diary part is Montserrat fontsyle.
+- The bottle is designed in the form of a message-in-a-bottle.
+- The to-do list is designed like a memo pad or notebook, with a layout similar to a diary.
+- put check boxes in the plan list
+- Remove reward word use Calendar Progress instead
+- Put pastel design background in the reward activity
+- Add cute background images to the little girl's interface.
+- Change the names of the bottom buttons for the diary and the schedule to 'Click me!',and change the color of the buttons to pink
+
 ## Table of Contents
 1. [Main Interface (MainActivity)](#main-interface-mainactivity)
 2. [Planning Activity (PlanActivity)](#planning-activity-planactivity)
@@ -85,3 +97,5 @@ English | [简体中文](README_zh.md)
 - Query results are traversed and processed using the `Cursor` object.
 - Data persistence ensures that user data is retained even after the app is closed.
 - The adapter pattern (`Adapter`) is used to connect data models with `RecyclerView`.
+
+
