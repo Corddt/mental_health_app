@@ -1,5 +1,6 @@
 package com.corddt.mental_health_app;
 
+import android.animation.Animator;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,6 +18,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +34,7 @@ public class PlanActivity extends AppCompatActivity {
     private SQLiteDatabase database;
     private List<Plan> plans;
     private GestureDetector gestureDetector;
+    private LottieAnimationView congratulationsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +44,16 @@ public class PlanActivity extends AppCompatActivity {
         editTextPlan = findViewById(R.id.editTextPlan);
         recyclerViewPlans = findViewById(R.id.recyclerViewPlans);
         recyclerViewPlans.setLayoutManager(new LinearLayoutManager(this));
+        congratulationsView = findViewById(R.id.congratulationsView);
+
+        // 初始化 plans 列表
+        plans = new ArrayList<>();
+
+        // 设置 RecyclerView 的适配器
+        planAdapter = new PlanAdapter(plans, this);
+        recyclerViewPlans.setAdapter(planAdapter);
+
         openDatabase();
-        loadPlans();
 
         Button btnSavePlan = findViewById(R.id.btnSavePlan);
         btnSavePlan.setOnClickListener(v -> addPlan());
@@ -69,7 +81,10 @@ public class PlanActivity extends AppCompatActivity {
             Intent intent = new Intent(PlanActivity.this, BottleActivity.class);
             startActivity(intent);
         });
+
+        loadPlans(); // 加载当天的计划
     }
+
 
     private void openDatabase() {
         database = openOrCreateDatabase("MotivationalDiary1.db", MODE_PRIVATE, null);
@@ -86,8 +101,9 @@ public class PlanActivity extends AppCompatActivity {
     }
 
     private void loadPlans() {
-        plans = new ArrayList<>();
-        Cursor cursor = database.rawQuery("SELECT * FROM plans", null);
+        plans.clear();
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        Cursor cursor = database.rawQuery("SELECT * FROM plans WHERE timestamp = ?", new String[]{currentDate});
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex("id"));
             String content = cursor.getString(cursor.getColumnIndex("plan"));
@@ -95,8 +111,7 @@ public class PlanActivity extends AppCompatActivity {
             plans.add(new Plan(id, content, completed == 1));
         }
         cursor.close();
-        planAdapter = new PlanAdapter(plans, this);
-        recyclerViewPlans.setAdapter(planAdapter);
+        planAdapter.notifyDataSetChanged(); // 确保数据变化后刷新适配器
     }
 
     private void addPlan() {
@@ -105,11 +120,15 @@ public class PlanActivity extends AppCompatActivity {
             ContentValues values = new ContentValues();
             values.put("plan", planContent);
             values.put("completed", 0);
+            String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            values.put("timestamp", currentDate); // 只使用日期部分
             database.insert("plans", null, values);
             editTextPlan.setText("");
             loadPlans();
         }
     }
+
+
 
     private void editPlanDialog(Plan plan) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -142,56 +161,47 @@ public class PlanActivity extends AppCompatActivity {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
             Plan plan = plans.get(position);
-            togglePlanStatus(plan.getId());
-            loadPlans();
+            togglePlanStatus(plan.getId(), position);
         }
 
-        private void togglePlanStatus(int planId) {
-            Cursor cursor = database.query("plans", new String[]{"completed", "timestamp"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
+        private void togglePlanStatus(int planId, int position) {
+            Cursor cursor = database.query("plans", new String[]{"completed"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int currentStatus = cursor.getInt(cursor.getColumnIndex("completed"));
-                String timestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
-
-                if (currentStatus == 0 && canCompletePlan()) {
-                    ContentValues values = new ContentValues();
-                    values.put("completed", 1);
-                    values.put("timestamp", getCurrentTimestamp());
-                    database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
-                    Toast.makeText(PlanActivity.this, "You're amazing, you've taken another step towards mastering your own life.", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(PlanActivity.this, "The gap between the two plans is too short (less than 25 minutes). Please wait a little longer.", Toast.LENGTH_LONG).show();
+                ContentValues values = new ContentValues();
+                values.put("completed", currentStatus == 0 ? 1 : 0); // 切换状态
+                database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
+                plans.get(position).setCompleted(currentStatus == 0); // 更新列表中的计划状态
+                planAdapter.notifyItemChanged(position); // 仅刷新改变的项
+                if (currentStatus == 0) {
+                    playCongratulationsAnimation();
                 }
-                cursor.close();
             }
+            cursor.close();
         }
 
-        private boolean canCompletePlan() {
-            Cursor cursor = database.rawQuery("SELECT timestamp FROM plans WHERE completed = 1 ORDER BY timestamp DESC LIMIT 1", null);
-            if (cursor != null && cursor.moveToFirst()) {
-                String lastCompletedTimestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
-                cursor.close();
-                return isTimeDifferenceSufficient(lastCompletedTimestamp);
-            }
-            return true; // 如果没有先前的完成计划，允许完成当前计划
-        }
+        private void playCongratulationsAnimation() {
+            congratulationsView.setVisibility(View.VISIBLE); // 确保视图可见
+            congratulationsView.setAnimation("WellDone.json");
+            congratulationsView.playAnimation();
+            congratulationsView.addAnimatorListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {}
 
-        private boolean isTimeDifferenceSufficient(String lastCompletedTimestamp) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            try {
-                Date lastCompletedDate = sdf.parse(lastCompletedTimestamp);
-                long timeDifference = new Date().getTime() - lastCompletedDate.getTime();
-                return timeDifference >= (25 * 60 * 1000); // 25分钟
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    congratulationsView.setVisibility(View.GONE); // 动画播放完后隐藏
+                }
 
-        private String getCurrentTimestamp() {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            return sdf.format(new Date());
+                @Override
+                public void onAnimationCancel(Animator animation) {}
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {}
+            });
         }
     }
+
 
     @Override
     protected void onDestroy() {

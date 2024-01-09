@@ -3,18 +3,17 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <ImageView
-        android:id="@+id/cryingGirlImageView"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:src="@drawable/crying_girl"
-    android:layout_centerInParent="true"/>
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/girlAnimationView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/reminderTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cryingGirlImageView"
+        android:layout_below="@id/girlAnimationView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:text="Reminder Message"/>

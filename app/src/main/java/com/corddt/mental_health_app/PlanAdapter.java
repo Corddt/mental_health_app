@@ -27,7 +27,7 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder
     public void onBindViewHolder(PlanViewHolder holder, int position) {
         Plan plan = planList.get(position);
         holder.planTextView.setText(plan.getContent());
-        // Change the text color based on completion status
+        // 根据计划完成状态更改文本颜色
         holder.planTextView.setTextColor(plan.isCompleted() ? context.getResources().getColor(android.R.color.holo_green_dark) : context.getResources().getColor(android.R.color.black));
     }
 

@@ -25,6 +25,13 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/congratulationsView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp" />
+
     <Button
         android:id="@+id/btnToBottle"
         android:layout_width="wrap_content"

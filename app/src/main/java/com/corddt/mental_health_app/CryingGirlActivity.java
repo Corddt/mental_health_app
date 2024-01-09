@@ -9,9 +9,12 @@ import android.widget.Button;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.airbnb.lottie.LottieAnimationView;
+import com.airbnb.lottie.LottieDrawable;
+
 public class CryingGirlActivity extends AppCompatActivity {
 
-    private ImageView girlImageView;
+    private LottieAnimationView girlAnimationView;
     private Button motivateButton;
     private SQLiteDatabase database;
 
@@ -20,7 +23,7 @@ public class CryingGirlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crying_girl);
 
-        girlImageView = findViewById(R.id.cryingGirlImageView);
+        girlAnimationView = findViewById(R.id.girlAnimationView);
         motivateButton = findViewById(R.id.motivateButton);
         openDatabase();
         updateGirlStatus();
@@ -37,13 +40,18 @@ public class CryingGirlActivity extends AppCompatActivity {
     private void updateGirlStatus() {
         boolean isInactive = checkUserInactivity(3);
         if (isInactive) {
-            girlImageView.setImageResource(R.drawable.crying_girl);
+            girlAnimationView.setAnimation("Crying_Girl_Animation.json");
+            girlAnimationView.setRepeatCount(LottieDrawable.INFINITE); // 设置为无限循环
+            girlAnimationView.playAnimation();
             showReminderDialog("You haven't completed any tasks in the last three days. Let's get back on track!");
         } else {
-            girlImageView.setImageResource(R.drawable.smiling_girl);
+            girlAnimationView.setAnimation("Smiling_Girl_Animation.json");
+            girlAnimationView.setRepeatCount(LottieDrawable.INFINITE); // 设置为无限循环
+            girlAnimationView.playAnimation();
             showReminderDialog("Great job staying active! Keep it up!");
         }
     }
+
 
     private boolean checkUserInactivity(int days) {
         String dateLimit = "datetime('now', '-" + days + " days')";

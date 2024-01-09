@@ -12,10 +12,12 @@ public class Plan {
         this.isCompleted = isCompleted;
     }
 
-    // Getters and Setters
+    // Getters
     public int getId() { return id; }
     public String getContent() { return content; }
     public boolean isCompleted() { return isCompleted; }
+
+    // Setters
     public void setContent(String content) { this.content = content; }
     public void setCompleted(boolean completed) { isCompleted = completed; }
 }
