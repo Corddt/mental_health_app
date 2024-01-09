@@ -73,7 +73,10 @@ public class BottleActivity extends AppCompatActivity {
     }
 
     private int getCompletedPlansCount() {
-        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM plans WHERE completed = 1", null);
+        // 获取当前日期
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        // 查询当天完成的计划数量
+        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM plans WHERE completed = 1 AND timestamp = ?", new String[]{currentDate});
         int count = 0;
         if (cursor.moveToFirst()) {
             count = cursor.getInt(0);
@@ -81,6 +84,7 @@ public class BottleActivity extends AppCompatActivity {
         cursor.close();
         return count;
     }
+
 
 
 
