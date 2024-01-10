@@ -46,18 +46,24 @@ public class BottleActivity extends AppCompatActivity {
         switch (completedPlansCount) {
             case 0:
                 lottieBottleView.setAnimation("default_animation.json");
+                lottieBottleView.setRepeatCount(LottieDrawable.INFINITE);
                 break;
             case 1:
-                lottieBottleView.setAnimation("Bottle02_Animation.json");
+                lottieBottleView.setAnimation("plan00.json");
                 break;
             case 2:
-                lottieBottleView.setAnimation("Bottle01_Animation.json");
+                lottieBottleView.setAnimation("plan01.json");
+                break;
+            case 3:
+                lottieBottleView.setAnimation("plan02.json");
+                break;
+            case 4:
+                lottieBottleView.setAnimation("plan03.json");
                 break;
             default:
-                lottieBottleView.setAnimation("Bottle03_Animation.json"); // 默认动画
+                lottieBottleView.setAnimation("plan04.json");
                 break;
         }
-        lottieBottleView.setRepeatCount(LottieDrawable.INFINITE);
         lottieBottleView.playAnimation();
     }
 

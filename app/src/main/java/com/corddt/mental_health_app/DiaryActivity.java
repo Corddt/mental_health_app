@@ -1,20 +1,25 @@
 package com.corddt.mental_health_app;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +28,7 @@ public class DiaryActivity extends AppCompatActivity {
     private EditText editTextDiary;
     private Button btnSaveDiary;
     private ListView listViewDiaries;
-    private ArrayAdapter<String> diaryAdapter;
+    private DiaryEntryAdapter diaryAdapter;
     private List<String> diaryEntries;
     private SQLiteDatabase database;
 
@@ -37,7 +42,7 @@ public class DiaryActivity extends AppCompatActivity {
         btnSaveDiary = findViewById(R.id.btnSaveDiary);
         listViewDiaries = findViewById(R.id.listViewDiaries);
         openDatabase();
-        diaryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, diaryEntries);
+        diaryAdapter = new DiaryEntryAdapter(this, diaryEntries);
         listViewDiaries.setAdapter(diaryAdapter);
 
         loadDiaries();
@@ -146,5 +151,31 @@ public class DiaryActivity extends AppCompatActivity {
     protected void onDestroy() {
         database.close();
         super.onDestroy();
+    }
+
+    private class DiaryEntryAdapter extends ArrayAdapter<String> {
+        public DiaryEntryAdapter(Context context, List<String> diaryEntries) {
+            super(context, 0, diaryEntries);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.diary_list_item, parent, false);
+            }
+
+            String diaryEntry = getItem(position);
+            String[] parts = diaryEntry.split(": ", 2);
+
+            TextView tvDiaryDate = convertView.findViewById(R.id.tvDiaryDate);
+            TextView tvDiaryEntry = convertView.findViewById(R.id.tvDiaryEntry);
+
+            if (parts.length >= 2) {
+                tvDiaryDate.setText(parts[0]); // 显示日期
+                tvDiaryEntry.setText(parts[1]); // 显示日记内容
+            }
+
+            return convertView;
+        }
     }
 }
