@@ -49,11 +49,14 @@ public class PlanActivity extends AppCompatActivity {
         // 初始化 plans 列表
         plans = new ArrayList<>();
 
+        // 打开数据库
+        openDatabase();
+
         // 设置 RecyclerView 的适配器
-        planAdapter = new PlanAdapter(plans, this);
+        planAdapter = new PlanAdapter(plans, this, database);
         recyclerViewPlans.setAdapter(planAdapter);
 
-        openDatabase();
+
 
         Button btnSavePlan = findViewById(R.id.btnSavePlan);
         btnSavePlan.setOnClickListener(v -> addPlan());

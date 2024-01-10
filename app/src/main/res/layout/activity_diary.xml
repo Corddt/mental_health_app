@@ -30,7 +30,7 @@
         android:id="@+id/btnToCryingGirl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go to Crying Girl"
+        android:text="Click me!"
         android:layout_gravity="center"/>
 
 </LinearLayout>
