@@ -2,19 +2,21 @@ package com.corddt.mental_health_app;
 
 import android.animation.Animator;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,13 +29,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class PlanActivity extends AppCompatActivity {
-
     private EditText editTextPlan;
     private RecyclerView recyclerViewPlans;
     private PlanAdapter planAdapter;
     private SQLiteDatabase database;
     private List<Plan> plans;
-    private GestureDetector gestureDetector;
     private LottieAnimationView congratulationsView;
 
     @Override
@@ -53,31 +53,11 @@ public class PlanActivity extends AppCompatActivity {
         openDatabase();
 
         // 设置 RecyclerView 的适配器
-        planAdapter = new PlanAdapter(plans, this, database);
+        planAdapter = new PlanAdapter(plans, this);
         recyclerViewPlans.setAdapter(planAdapter);
-
-
 
         Button btnSavePlan = findViewById(R.id.btnSavePlan);
         btnSavePlan.setOnClickListener(v -> addPlan());
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToToggleStatusCallback());
-        itemTouchHelper.attachToRecyclerView(recyclerViewPlans);
-
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                View view = recyclerViewPlans.findChildViewUnder(e.getX(), e.getY());
-                if (view != null) {
-                    int position = recyclerViewPlans.getChildAdapterPosition(view);
-                    editPlanDialog(plans.get(position));
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        recyclerViewPlans.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
         Button btnToBottle = findViewById(R.id.btnToBottle);
         btnToBottle.setOnClickListener(v -> {
@@ -87,7 +67,6 @@ public class PlanActivity extends AppCompatActivity {
 
         loadPlans(); // 加载当天的计划
     }
-
 
     private void openDatabase() {
         database = openOrCreateDatabase("MotivationalDiary1.db", MODE_PRIVATE, null);
@@ -131,8 +110,6 @@ public class PlanActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void editPlanDialog(Plan plan) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Edit Plan");
@@ -150,61 +127,81 @@ public class PlanActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private class SwipeToToggleStatusCallback extends ItemTouchHelper.SimpleCallback {
-        SwipeToToggleStatusCallback() {
-            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-        }
+    private void playCongratulationsAnimation() {
+        congratulationsView.setVisibility(View.VISIBLE); // 确保视图可见
+        congratulationsView.setAnimation("WellDone.json");
+        congratulationsView.playAnimation();
+        congratulationsView.addAnimatorListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
 
-        @Override
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            int position = viewHolder.getAdapterPosition();
-            Plan plan = plans.get(position);
-            togglePlanStatus(plan.getId(), position);
-        }
-
-        private void togglePlanStatus(int planId, int position) {
-            Cursor cursor = database.query("plans", new String[]{"completed"}, "id = ?", new String[]{String.valueOf(planId)}, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int currentStatus = cursor.getInt(cursor.getColumnIndex("completed"));
-                ContentValues values = new ContentValues();
-                values.put("completed", currentStatus == 0 ? 1 : 0); // 切换状态
-                database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
-                plans.get(position).setCompleted(currentStatus == 0); // 更新列表中的计划状态
-                planAdapter.notifyItemChanged(position); // 仅刷新改变的项
-                if (currentStatus == 0) {
-                    playCongratulationsAnimation();
-                }
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                congratulationsView.setVisibility(View.GONE); // 动画播放完后隐藏
             }
-            cursor.close();
-        }
 
-        private void playCongratulationsAnimation() {
-            congratulationsView.setVisibility(View.VISIBLE); // 确保视图可见
-            congratulationsView.setAnimation("WellDone.json");
-            congratulationsView.playAnimation();
-            congratulationsView.addAnimatorListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {}
+            @Override
+            public void onAnimationCancel(Animator animation) {}
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    congratulationsView.setVisibility(View.GONE); // 动画播放完后隐藏
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {}
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {}
-            });
-        }
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        });
     }
 
+    private class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.PlanViewHolder> {
+        private List<Plan> planList;
+        private Context context;
+
+        public PlanAdapter(List<Plan> planList, Context context) {
+            this.planList = planList;
+            this.context = context;
+        }
+
+        @Override
+        public PlanViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.plan_list_item, parent, false);
+            return new PlanViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(PlanViewHolder holder, int position) {
+            Plan plan = planList.get(position);
+            holder.planTextView.setText(plan.getContent());
+            holder.completedCheckbox.setChecked(plan.isCompleted());
+
+            holder.completedCheckbox.setOnCheckedChangeListener(null);
+            holder.completedCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                togglePlanStatus(plan.getId(), isChecked);
+                plan.setCompleted(isChecked);
+            });
+        }
+
+        private void togglePlanStatus(int planId, boolean isCompleted) {
+            ContentValues values = new ContentValues();
+            values.put("completed", isCompleted ? 1 : 0);
+            database.update("plans", values, "id = ?", new String[]{String.valueOf(planId)});
+
+            if (isCompleted) {
+                playCongratulationsAnimation();
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return planList.size();
+        }
+
+        public class PlanViewHolder extends RecyclerView.ViewHolder {
+            public TextView planTextView;
+            public CheckBox completedCheckbox;
+
+            public PlanViewHolder(View itemView) {
+                super(itemView);
+                planTextView = itemView.findViewById(R.id.text_plan_content);
+                completedCheckbox = itemView.findViewById(R.id.checkbox_completed);
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {

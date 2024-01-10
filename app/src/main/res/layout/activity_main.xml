@@ -55,7 +55,7 @@
         android:layout_marginTop="10dp"
         android:layout_weight="1"
         android:background="@drawable/main_activity_btn_girl_pic"
-        android:text="Contact"
+        android:text="Cal. Progress"
         android:textColor="#FFFFFF"
         android:textSize="60sp"
         android:textStyle="bold|italic" />
